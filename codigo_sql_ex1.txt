@@ -158,3 +158,5 @@ select E.employeeId, count(*);
 --from employee as E INNER JOIN customer as C
  --   ON (C.supportrepid = E.employeeid)
 
+--from employee as E INNER JOIN customer as WALLACE
+ --   ON (C.supportrepid = E.employeeid)
