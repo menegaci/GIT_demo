@@ -1,0 +1,160 @@
+-Exemplos CHINOOK!
+
+-- 1. Vamos fazer uma query/consulta nas tabelas Customer e Invoice, e tirar algumas conclusões 
+-- UM SELECT SIMPLES (Todas as colunas)
+-- SELECT+FROM
+-- Tabela: Customer ou Invoice
+
+
+-- 2. Agora queremos dessas mesmas tabelas o nome e sobrenome do cliente (primeiro separado, depois junto)
+-- e também a cidade e estado do pedido (primeiro separado, depois junto com hifen)
+-- Notaram algo? Precisamos ajustar algumas coisas.
+-- UM SELECT SIMPLES (Escolhendo as colunas e fazendo algumas brincadeiras)
+-- SELECT+FROM
+-- Tabela: Invoice e Customer
+-- Colunas: TBD (Juntar Nomes, Cidade e estado...)
+
+-- 3. Vamos fazer um filtro simples por preço, quero as músicas de mais longa duração que custem menos de 1 dolar
+-- ACRESCENTANDO UM FILTRO SIMPLES COM WHERE e ORDER BY
+-- SELECT+FROM+WHERE
+-- Tabela: Track
+-- Coluna de Filtro: UnitPrice ou Milliseconds
+
+
+-- 4. Tabela de clientes, quero todos os clientes com emails terminando em 'com' e que sejam dos estados SP e RJ OU não tenham um estado definido
+-- ACRESCENTANDO FILTROS MAIS COMPLEXOS (USANDO IN/BETWEEN/LIKE/IS NULL) E OPERADORES BOOLEANOS
+-- SELECT+FROM+WHERE+AND/OR
+-- Tabela: Customer
+-- Colunas de Filtro: Like no email, IN no State ou não tenham um estado definido
+
+-- 5. Vamos na tabela de Tracks, ver o total armazenado em megabytes, quantos tracks tem, e quantos tem um composer cadastrado
+-- AGREGAÇÃO SIMPLES
+-- SELECT+AGG+FROM
+-- Tabela: Track e Customer
+-- Coluna de agregação: soma Bytes (transformar em MB) e composer (count)
+
+
+-- 6. Na tabela de Invoice, quero saber por cidade qual o total de valor dos pedidos, e número de pedidos
+-- AGREGAÇÃO COM COLUNA DE AGRUPAMENTO
+-- SELECT+AGG+FROM+GROUP BY
+-- Tabela: Invoice
+-- Coluna de agregação: Total e count
+-- Coluna de agrupamento: BillingCity, State
+
+SELECT BillingCity,
+        SUM(Total),
+        COUNT(1)
+FROM Invoice
+GROUP BY BillingCity;
+
+SELECT BillingCity, --coluna 1
+        SUM(Total), --coluna 2
+        COUNT(1), --coluna 3
+        MAX(TOTAL),
+        MIN(TOTAL)
+FROM Invoice
+GROUP BY BillingCity
+ORDER BY 3 DESC; -- ordenou pela terceira coluna
+
+SELECT  BillingCity,
+        SUM(Total), 
+        COUNT(1), 
+        MAX(TOTAL),
+        MIN(TOTAL),
+        COUNT(BillingCity),
+        COUNT(DISTINCT BillingCity) -- traz a contagem por cidade ou seja por cidade distinta, ex: vai trazer uma linha com Berlim, uma linha com Paris, etc
+FROM Invoice
+GROUP BY BillingCity
+ORDER BY 3 DESC; -- ordenou pela terceira coluna
+
+SELECT DISTINCT Billingcity from invoice;
+--é a mesma coisa que a query abaixo
+SELECT Billingcity from invoice
+Group BY Billingcity;
+
+
+-- 7. Na tabela de clientes, quero os paises que tem mais de um cliente, e quais são esses países. E quais países tem só 1?
+-- AGREGAÇÃO COM AGRUPAMENTO E FILTRO NA AGREGAÇÃO 
+-- SELECT+AGG+FROM+GROUP BY+HAVING
+-- Tabela: Customer
+-- Coluna de agregação: count(*)
+-- Coluna de agrupamento: country
+-- Filtro de agregação: count > x
+
+SELECT 
+Country,
+COUNT(*)
+FROM Customer
+GROUP BY Country
+Having count(*)>1;
+
+SELECT 
+Country
+FROM Customer
+GROUP BY Country
+Having count(*)=1;
+
+SELECT 
+Country,
+COUNT(*) AS CONT
+FROM Customer
+GROUP BY Country
+Having count(*)>1;
+
+SELECT CONT, COUNT(*)
+    FROM
+(SELECT Country, COUNT(*) AS CONT
+FROM Customer
+GROUP BY Country
+Having count(*)>1)
+GROUP BY cont;
+
+-- 
+SELECT *
+    FROM
+(SELECT Country, COUNT(*) AS CONT
+FROM Customer
+GROUP BY Country)
+where cont > 1;
+
+-- 8. Faça uma consulta que traga os artistas de cada album, nomes dos dois.
+-- INNER JOIN
+-- SELECT+FROM+INNER JOIN+ON
+-- TabelaA: Album
+-- TabelaB: Artist
+-- Chave de JOIN: ArtistId
+
+/*SELECT A.*,B.*
+FROM TABA AS A INNER JOIN TABB AS B
+    ON (TABA.KEY_A=TABB.KEY_A)*/
+    
+SELECT ALB.Title,ART.Name,
+FROM Album as ALB INNER JOIN Artist as ART
+    ON (ALB.ArtistId = ART.ArtistID)
+WHERE ART.NAME LIKE 'A%';
+    
+SELECT ALB.Title,ART.Name
+FROM Album as ALB INNER JOIN Artist as ART
+    ON (ArtistId = ArtistID);
+
+
+-- 9. Faça uma consulta que retorne o número de clientes atendidos por cada empregado
+-- (há um vínculo entre empregado e cliente)
+-- ATENCAO: QUero que apareçam os empregados sem nenhum cliente!
+-- LEFT JOIN
+-- SELECT+FROM+LEFT JOIN+ON
+-- TabelaA (left): Employee
+-- TabelaB: Customer
+-- Chave de JOIN: employeeid, supportrepid
+
+select E.employeeId, C.supportrepid
+from employee as E INNER JOIN
+ customer as C
+    ON (C.supportrepid = E.employeeid);
+    
+select E.employeeId, count(*);
+
+
+--from employee as E INNER JOIN customer as C
+ --   ON (C.supportrepid = E.employeeid)
+
